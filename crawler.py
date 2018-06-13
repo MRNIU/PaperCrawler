@@ -5,13 +5,6 @@
 import urllib3
 import re
 
-
-
-# skip 指定开始位置， show 指定本页显示数量
-
-# 需要一个结构体数组
-# 字典 标题：(列表)作者
-# 标题 作者 pdf 分类 arxiv编号
 class paper_struct:
     def __init__(self):
         self.title = ""  # 标题
@@ -19,7 +12,6 @@ class paper_struct:
         self.pdf = ""  # pdf 地址
         self.subject = ()  # 分类
         self.arxiv = 0  # arxiv 编号
-
 
 class paper_crwaler:
     def __init__(self, count):
@@ -41,11 +33,11 @@ class paper_crwaler:
         self.page = self.page.decode()
 
         self.papers = []
-        self.titles = []
+        #self.titles = []
         self.authors = []
-        self.arxives = ()
+        self.arxives = []
         self.pdfs = []
-        self.subject = []
+        #self.subject = []
 
         # 动态创建 count 个 paper_struct 实例
         #for i in count:
@@ -61,6 +53,7 @@ class paper_crwaler:
             count -= 1
             skip = count / 854
         tmp = url+'skip='+ str(skip)+'&show='+str(count)
+        # skip 指定开始位置， show 指定本页显示数量
         return tmp
 
     def test(self):
@@ -116,6 +109,19 @@ class paper_crwaler:
             self.papers[i].authors = self.authors
             print(self.papers[0].authors)
 
+    def download_pdf(self):
+        http = urllib3.PoolManager()
+        for i in range(self.count):
+            response = http.request('GET', self.papers[i].pdf, headers=self.header)
+            print(response.status)
+            print(self.papers[i].pdf)
+            with open(self.papers[i].title + '.pdf', 'wb') as file:
+                file.write(response.data)
+                file.close()
+                response.release_conn()
+
+
+
 def main(count):
     pc=paper_crwaler(count)
     pc.test()
@@ -125,6 +131,7 @@ def main(count):
     pc.get_pdf()
     pc.get_subject()
     pc.create_paper()
+    pc.download_pdf()
 
 if __name__ == '__main__':
     main(5)
