@@ -4,6 +4,7 @@
 
 import urllib3
 import re
+import time
 
 class paper_struct:
     def __init__(self):
@@ -38,9 +39,6 @@ class paper_crwaler:
         self.arxives = []
         self.pdfs = []
         #self.subject = []
-
-        # 动态创建 count 个 paper_struct 实例
-        #for i in count:
 
     def create_url(self, count=20):
         url = 'https://arxiv.org/list/cs/pastweek?'
@@ -107,23 +105,21 @@ class paper_crwaler:
             #self.papers[i].subject = self.subject[i]
             self.papers[i].subject = self.get_subject()[i]
             self.papers[i].authors = self.authors
-            print(self.papers[0].authors)
+            #print(self.papers[0].authors)
 
     def download_pdf(self):
         http = urllib3.PoolManager()
         for i in range(self.count):
             response = http.request('GET', self.papers[i].pdf, headers=self.header)
-            print(response.status)
-            print(self.papers[i].pdf)
+            self.test()
             with open(self.papers[i].title + '.pdf', 'wb') as file:
                 file.write(response.data)
                 file.close()
                 response.release_conn()
 
-
-
 def main(count):
-    pc=paper_crwaler(count)
+    t_start = time.time()
+    pc = paper_crwaler(count)
     pc.test()
     pc.get_title()
     #pc.get_authors()
@@ -132,6 +128,7 @@ def main(count):
     pc.get_subject()
     pc.create_paper()
     pc.download_pdf()
+    print(time.time() - t_start)
 
 if __name__ == '__main__':
     main(5)
